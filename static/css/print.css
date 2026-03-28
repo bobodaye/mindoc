@@ -4,3 +4,39 @@ body {font-size: 12pt !important;}
 .manual-article .article-content{ min-width: initial !important;max-width: initial !important; width: inherit !important;padding: auto !important;}
 pre, code {white-space: pre-wrap !important;word-wrap: break-word !important;}
 a:link, a:visited {color: blue !important;text-decoration: underline !important;}
+
+/* 打印时隐藏"上一篇/下一篇"导航 */
+.wiki-bottom-left {display: none !important;}
+
+/* Cherry Markdown: 将右侧固定目录重置为页面顶部内联显示 */
+.manual-article.cherry-markdown .toc {
+    position: static !important;
+    right: auto !important;
+    width: 100% !important;
+    max-height: none !important;
+    border: 1px solid #e8e8e8;
+    border-radius: 6px;
+    margin-bottom: 20px;
+}
+
+/* Default Markdown: 将右侧固定目录重置为页面顶部内联显示 */
+.article-body .markdown-toc {
+    position: static !important;
+    right: auto !important;
+    width: 100% !important;
+    max-height: none !important;
+    margin-bottom: 20px;
+}
+.article-body.content .markdown-toc {
+    position: static !important;
+}
+.content > .whole-article-wrap > .markdown-toc {
+    position: static !important;
+    right: auto !important;
+    width: 100% !important;
+    max-height: none !important;
+    margin-bottom: 20px;
+}
+.article-body .markdown-article {
+    width: 100% !important;
+}
