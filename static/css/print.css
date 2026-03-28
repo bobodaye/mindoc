@@ -40,3 +40,14 @@ a:link, a:visited {color: blue !important;text-decoration: underline !important;
 .article-body .markdown-article {
     width: 100% !important;
 }
+
+/* Cherry Markdown: 修复代码块打印导出PDF后复制内容顺序异常的问题 */
+/* 根因：CSS counter() 生成的行号 + position: absolute 导致 PDF 文本层排列错乱 */
+.cherry-markdown div[data-type=codeBlock]>pre code[class*=language-] .code-line {
+    display: block !important;
+    position: static !important;
+    padding-left: 0 !important;
+}
+.cherry-markdown div[data-type=codeBlock]>pre code[class*=language-] .code-line:before {
+    content: none !important;
+}
