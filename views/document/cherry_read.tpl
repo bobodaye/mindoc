@@ -367,27 +367,64 @@ $(function () {
 });
 
 // Fix: Cherry Markdown 打印导出 PDF 时，代码块复制内容顺序异常
-// 根因：.code-line (display:inline-block + position:relative) 和 :before (counter + position:absolute)
-// 导致 PDF 文本层排列错乱。打印前将代码块简化为纯文本，打印后恢复。
+// 根因：PrismJS line-numbers 插件 + cherry-markdown.css 样式（text-shadow、display:inline-block）
+// 导致 PDF 文本层排列错乱。打印前将代码块简化为纯文本并移除干扰样式，打印后恢复。
 window.addEventListener('beforeprint', function() {
-    document.querySelectorAll('.cherry-markdown div[data-type="codeBlock"] pre code').forEach(function(code) {
-        code.setAttribute('data-original-html', code.innerHTML);
-        var lines = code.querySelectorAll('.code-line');
-        if (lines.length > 0) {
-            var textParts = [];
-            lines.forEach(function(line) {
-                textParts.push(line.textContent);
-            });
-            code.textContent = textParts.join('\n');
+    var container = document.querySelector('.cherry-markdown');
+    if (!container) return;
+    container.querySelectorAll('div[data-type="codeBlock"]').forEach(function(block) {
+        var pre = block.querySelector('pre');
+        var code = pre && pre.querySelector('code');
+        if (!pre || !code) return;
+        // 保存原始状态
+        pre.setAttribute('data-print-original-class', pre.className);
+        code.setAttribute('data-print-original-html', code.innerHTML);
+        block.setAttribute('data-print-original-style', block.getAttribute('style') || '');
+        // 提取纯文本（排除 line-numbers-rows 和 line-numbers-sizer）
+        var plainText = '';
+        for (var i = 0; i < code.childNodes.length; i++) {
+            var node = code.childNodes[i];
+            if (node.nodeType === 3) {
+                plainText += node.textContent;
+            } else if (node.nodeType === 1 &&
+                       !node.classList.contains('line-numbers-rows') &&
+                       !node.classList.contains('line-numbers-sizer')) {
+                plainText += node.textContent;
+            }
         }
+        // 替换为纯文本
+        code.textContent = plainText;
+        // 移除 PrismJS line-numbers 类（取消 padding-left: 3.8em 和 counter-reset）
+        pre.className = pre.className.replace(/\bline-numbers\b/g, '').trim();
+        // 重置 wrapper 的 display: inline-block 为 block
+        block.style.display = 'block';
     });
 });
 window.addEventListener('afterprint', function() {
-    document.querySelectorAll('.cherry-markdown div[data-type="codeBlock"] pre code').forEach(function(code) {
-        var original = code.getAttribute('data-original-html');
-        if (original) {
-            code.innerHTML = original;
-            code.removeAttribute('data-original-html');
+    var container = document.querySelector('.cherry-markdown');
+    if (!container) return;
+    container.querySelectorAll('div[data-type="codeBlock"]').forEach(function(block) {
+        var pre = block.querySelector('pre');
+        var code = pre && pre.querySelector('code');
+        if (!pre || !code) return;
+        var originalClass = pre.getAttribute('data-print-original-class');
+        var originalHtml = code.getAttribute('data-print-original-html');
+        var originalStyle = block.getAttribute('data-print-original-style');
+        if (originalClass !== null) {
+            pre.className = originalClass;
+            pre.removeAttribute('data-print-original-class');
+        }
+        if (originalHtml !== null) {
+            code.innerHTML = originalHtml;
+            code.removeAttribute('data-print-original-html');
+        }
+        if (originalStyle !== null) {
+            if (originalStyle) {
+                block.setAttribute('style', originalStyle);
+            } else {
+                block.removeAttribute('style');
+            }
+            block.removeAttribute('data-print-original-style');
         }
     });
 });

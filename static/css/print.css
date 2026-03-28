@@ -42,7 +42,28 @@ a:link, a:visited {color: blue !important;text-decoration: underline !important;
 }
 
 /* Cherry Markdown: 修复代码块打印导出PDF后复制内容顺序异常的问题 */
-/* 根因：CSS counter() 生成的行号 + position: absolute 导致 PDF 文本层排列错乱 */
+/* 隐藏 PrismJS 行号元素（绝对定位 + CSS counter 导致 PDF 文本层排列错乱） */
+.cherry-markdown .line-numbers-rows {
+    display: none !important;
+}
+.cherry-markdown .line-numbers-sizer {
+    display: none !important;
+}
+/* 移除 PrismJS line-numbers 的 padding-left 和 position */
+.cherry-markdown pre[class*=language-].line-numbers {
+    padding-left: 1em !important;
+    position: static !important;
+}
+/* 重置 cherry wrapper 的 display: inline-block */
+.cherry-markdown div[data-type=codeBlock] {
+    display: block !important;
+}
+/* 移除 text-shadow（影响 PDF 文本层提取） */
+.cherry-markdown div[data-type=codeBlock] code[class*=language-],
+.cherry-markdown div[data-type=codeBlock] pre[class*=language-] {
+    text-shadow: none !important;
+}
+/* Cherry 原始 .code-line 样式重置（如 PrismJS 未覆盖时的 fallback） */
 .cherry-markdown div[data-type=codeBlock]>pre code[class*=language-] .code-line {
     display: block !important;
     position: static !important;
