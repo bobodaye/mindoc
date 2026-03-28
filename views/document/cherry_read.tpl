@@ -365,6 +365,32 @@ $(function () {
         pageClicked(-1, parseInt($('#doc_id').val()));
     }
 });
+
+// Fix: Cherry Markdown 打印导出 PDF 时，代码块复制内容顺序异常
+// 根因：.code-line (display:inline-block + position:relative) 和 :before (counter + position:absolute)
+// 导致 PDF 文本层排列错乱。打印前将代码块简化为纯文本，打印后恢复。
+window.addEventListener('beforeprint', function() {
+    document.querySelectorAll('.cherry-markdown div[data-type="codeBlock"] pre code').forEach(function(code) {
+        code.setAttribute('data-original-html', code.innerHTML);
+        var lines = code.querySelectorAll('.code-line');
+        if (lines.length > 0) {
+            var textParts = [];
+            lines.forEach(function(line) {
+                textParts.push(line.textContent);
+            });
+            code.textContent = textParts.join('\n');
+        }
+    });
+});
+window.addEventListener('afterprint', function() {
+    document.querySelectorAll('.cherry-markdown div[data-type="codeBlock"] pre code').forEach(function(code) {
+        var original = code.getAttribute('data-original-html');
+        if (original) {
+            code.innerHTML = original;
+            code.removeAttribute('data-original-html');
+        }
+    });
+});
 </script>
 {{.Scripts}}
 </body>
