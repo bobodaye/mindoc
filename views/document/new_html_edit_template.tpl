@@ -19,6 +19,7 @@
         window.selectedDocId = {{.SelectedDocId}};
         window.selectNode = null;
         window.deleteURL = "{{urlfor "DocumentController.Delete" ":key" .Model.Identify}}";
+        window.editPageURL = "{{urlfor "DocumentController.Edit" ":key" .Model.Identify ":id" ""}}";
         window.editURL = "{{urlfor "DocumentController.Content" ":key" .Model.Identify ":id" ""}}";
         window.releaseURL = "{{urlfor "BookController.Release" ":key" .Model.Identify}}";
         window.sortURL = "{{urlfor "BookController.SaveSort" ":key" .Model.Identify}}";

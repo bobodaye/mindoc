@@ -79,6 +79,7 @@ func (c *DocumentController) Index() {
 			c.Data["Content"] = template.HTML(doc.Release)
 			c.Data["Description"] = utils.AutoSummary(doc.Release, 120)
 			c.Data["FoldSetting"] = "first"
+			c.Data["DocumentId"] = doc.DocumentId
 
 			if bookResult.Editor == EditorCherryMarkdown {
 				c.Data["MarkdownTheme"] = doc.MarkdownTheme
@@ -95,6 +96,10 @@ func (c *DocumentController) Index() {
 		c.Data["Title"] = i18n.Tr(c.Lang, "blog.summary")
 		c.Data["Content"] = template.HTML(blackfriday.Run([]byte(bookResult.Description)))
 		c.Data["FoldSetting"] = "closed"
+	}
+
+	if c.Data["DocumentId"] == nil {
+		c.Data["DocumentId"] = 0
 	}
 
 	tree, err := models.NewDocument().CreateDocumentTreeForHtml(bookResult.BookId, selected)
@@ -332,6 +337,9 @@ func (c *DocumentController) resolveEditDocument(bookId int, id string) (*models
 
 	doc := models.NewDocument()
 	if docId, err := strconv.Atoi(id); err == nil {
+		if docId <= 0 {
+			return nil, nil
+		}
 		doc, err = doc.FromCacheById(docId)
 		if err != nil {
 			return nil, err

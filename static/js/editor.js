@@ -71,7 +71,15 @@ function setLastSelectNode($node) {
             window.sessionStorage.removeItem("MinDoc::LastLoadDocument:" + window.book.identify);
         } else {
             var nodeId = $node.id ? $node.id : $node.node.id;
-            window.sessionStorage.setItem("MinDoc::LastLoadDocument:" + window.book.identify, nodeId);
+            var normalizedNodeId = parseInt(nodeId, 10);
+
+            window.sessionStorage.setItem("MinDoc::LastLoadDocument:" + window.book.identify, normalizedNodeId);
+
+            // 更新浏览器URL以反映当前选中的文档
+            if (normalizedNodeId > 0 && window.editPageURL && window.history && window.history.replaceState) {
+                var basePath = window.editPageURL.replace(/\/+$/, '');
+                window.history.replaceState(null, '', basePath + '/' + normalizedNodeId);
+            }
         }
     }
 }
